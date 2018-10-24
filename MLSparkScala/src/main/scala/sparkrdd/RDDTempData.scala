@@ -23,11 +23,11 @@ object RDDTempData {
 
   val maxTemp = data.map(_.tmax).max
   val hotDays = data.filter(_.tmax == maxTemp)
-  println(s"Hot days are ${hotDays.collect().mkString(", ")}")
+  println(s"Hot days are: ${hotDays.collect().mkString(", ")}")
 
-  println(data.max()(Ordering.by(_.tmax)))
+  println(s"Max Temp Day in order: ${data.max()(Ordering.by(_.tmax))}")
 
-  println(data.reduce((td1, td2) => if (td1.tmax >= td2.tmax) td1 else td2))
+  println(s"Max Tem Day using reduce method: ${data.reduce((td1, td2) => if (td1.tmax >= td2.tmax) td1 else td2)}")
 
   val rainyCount = data.filter(_.precip >= 1.0).count()
   println(s"There are $rainyCount rainy days. There is ${rainyCount * 100.0 / data.count()} percent.")
