@@ -1,0 +1,28 @@
+exit
+compile
+eclipse
+clen
+clean
+exit
+compile
+eclipse
+compile
+run
+exit
+runMain SimpleMain
+exit
+compile
+runMain SimpleMain
+clean
+runMain SimpleMain
+clean
+exit
+compile
+run
+clean
+exit
+compile
+clean
+compile
+clean
+exit

@@ -20,26 +20,29 @@ object NOAAwithSQL {
   spark.sparkContext.setLogLevel("WARN")
 
   val tschema = StructType(Array(
-    StructField("sid", StringType),
-    StructField("date", DateType),
-    StructField("mtype", StringType),
-    StructField("value", DoubleType)))
-  val data2018 = spark.read.schema(tschema).option("dateFormat", "yyyyMMdd").csv("data/2018.csv").cache()
-  //  data2018.show()
-  //  data2018.schema.printTreeString()
+      StructField("sid", StringType),
+      StructField("date", DateType),
+      StructField("mtype", StringType),
+      StructField("value", DoubleType)))
 
-  val sschema = StructType(Array(
-    StructField("sid", StringType),
-    StructField("lat", DoubleType),
-    StructField("lon", DoubleType),
-    StructField("name", StringType)))
-  val stationRDD = spark.sparkContext.textFile("data/ghcnd-stations.txt").map { line =>
+    val data2018 = spark.read.schema(tschema).option("dateFormat", "yyyyMMdd").csv("data/2018.csv").cache()
+    //  data2018.show()
+    //  data2018.schema.printTreeString()
+  
+    val sschema = StructType(Array(
+        StructField("sid", StringType),
+        StructField("lat", DoubleType),
+        StructField("lon", DoubleType),
+        StructField("name", StringType)))
+  
+    val stationRDD = spark.sparkContext.textFile("data/ghcnd-stations.txt").map { line =>
     val id = line.substring(0, 11)
     val lat = line.substring(12, 20).toDouble
     val lon = line.substring(21, 30).toDouble
     val name = line.substring(41, 71)
     Row(id, lat, lon, name)
   }
+
   val stations = spark.createDataFrame(stationRDD, sschema).cache()
 
   data2018.createOrReplaceTempView("data2018")
