@@ -28,6 +28,18 @@ object ConsumptionDF {
        StructField("dateYear",IntegerType),
        StructField("weekNumber",IntegerType)
        ))
+       
+   val storeSchema = StructType(Array(
+       StructField("storeID",IntegerType),
+       StructField("country",StringType)
+       ))
+       
+   val productSchema = StructType(Array(
+       StructField("productID",LongType),
+       StructField("division",StringType),
+       StructField("gender",StringType),
+       StructField("category",StringType)
+       ))
   
    val salesDF = spark.read.schema(salSchema).option("header", "true").csv("data/sales.csv").
                  select("saleID", "storeID", "dateID", "productID", "salesUnits", "netSales")
@@ -43,7 +55,7 @@ object ConsumptionDF {
 
    val joinedSalesGroup =  salesDF.as("s").join(calendarDF.as("c")).
                             where($"s.dateID" === $"c.dateID").drop($"c.dateID").
-                            select(concat(lit("Y"), ($"c.dateYear"%1000).alias("Year").cast(StringType), lit("W"), ($"c.weekNumber").cast(StringType)).alias("ID"), $"s.storeID", $"s.productId", $"s.salesUnits", $"s.netSales")
+                            select(concat(lit("Y"), ($"c.dateYear"%1000).cast(StringType), lit("_W"), ($"c.weekNumber").cast(StringType)).alias("ID"), $"s.storeID", $"s.productId", $"s.salesUnits", $"s.netSales")
                             //select(($"c.dateYear"%1000).alias("ID"), $"s.storeID", $"s.productId", $"s.salesUnits", $"s.netSales")
    /*val joinedSalesGroup =  salesDF.join(calendarDF, salesDF("dateID") === calendarDF("dateID"), "inner").
                                      drop(calendarDF("dateID"))*/
@@ -54,7 +66,26 @@ object ConsumptionDF {
 
    val aggConsumptionGroup = joinedSalesGroup.groupBy($"ID", $"storeID", $"productID").
                              agg(sum($"salesUnits").as("salesUnits"),round(sum($"netSales"),2).as("netSales"))
-   aggConsumptionGroup.show()
+   //aggConsumptionGroup.show()
+                             
+   val storeRDD = spark.sparkContext.textFile("data/store.csv").filter(!_.contains("storeid")).
+                     map { line =>
+                     val p = line.split(",").map(_.trim)
+                     Row(p(0).toInt, p(2))
+                  }
+   val storeDF = spark.createDataFrame(storeRDD, storeSchema)
+   
+   val productRDD = spark.sparkContext.textFile("data/product.csv").filter(!_.contains("productid")).
+                          map { line => val p = line.split(",").map(_.trim)
+                          Row(p(0).toLong, p(1), p(2), p(3))
+                          }
+   val productDF = spark.createDataFrame(productRDD, productSchema)
+   
+   aggConsumptionGroup.as("c").join(storeDF.as("s")).
+                       where($"c.storeID" === $"s.storeID").drop($"s.storeID").
+                       join(productDF.as("p")).
+                       where($"c.productID" === $"p.productID").drop($"p.productID").
+                       select(concat($"ID",lit("_"),$"country",lit("_"),$"division",lit("_"),$"gender",lit("_"),$"category").alias("ID"),$"salesUnits",$"netSales").show()
 
    spark.stop()
   }
