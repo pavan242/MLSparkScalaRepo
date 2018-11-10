@@ -17,7 +17,7 @@ object ConsumptionRDD {
   
   // Read the csv file and convert into an RDD of type Sales
   val salesRDD = sc.textFile("data/sales.csv").
-                 filter(!_.contains("netSales")).map { 
+                    filter(!_.contains("netSales")).map { 
                        line => val p = line.split(",").map(_.trim)
                        Sales(p(4).toInt, p(3).toInt, p(5).toLong, p(2).toInt, p(1).toDouble)
                  }//.cache()
@@ -90,9 +90,9 @@ object ConsumptionRDD {
                          map({case(a,((b,c,d),(e,f,g))) => b+"_"+e+"_"+f+"_"+g+", "+c+", "+d})
                          //map({case(a,((b,c,d),(e,f,g))) => b+"_"+e+"_"+f+"_"+g -> (c, d)})
 
-  //consumptionGroup.take(10) foreach println
+  consumptionGroup.take(10) foreach println
   //consumptionGroup.saveAsTextFile("/home/pavan/Data/output")
-  consumptionGroup.repartition(1).saveAsTextFile("/home/pavan/Data/output")
+  //consumptionGroup.repartition(1).saveAsTextFile("/home/pavan/Data/output")
   
   sc.stop()
  }

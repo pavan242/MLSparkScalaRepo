@@ -81,11 +81,14 @@ object ConsumptionDF {
                           }
    val productDF = spark.createDataFrame(productRDD, productSchema)
    
-   aggConsumptionGroup.as("c").join(storeDF.as("s")).
+   val consumptionDF = aggConsumptionGroup.as("c").join(storeDF.as("s")).
                        where($"c.storeID" === $"s.storeID").drop($"s.storeID").
                        join(productDF.as("p")).
                        where($"c.productID" === $"p.productID").drop($"p.productID").
-                       select(concat($"ID",lit("_"),$"country",lit("_"),$"division",lit("_"),$"gender",lit("_"),$"category").alias("ID"),$"salesUnits",$"netSales").show()
+                       select(concat($"ID",lit("_"),$"country",lit("_"),$"division",lit("_"),$"gender",lit("_"),$"category").alias("ID"),$"salesUnits",$"netSales")
+                       
+   consumptionDF.show()
+   //consumptionDF.repartition(1).write.json("/home/pavan/Data/output")
 
    spark.stop()
   }
