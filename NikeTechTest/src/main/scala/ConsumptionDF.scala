@@ -4,6 +4,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Row
+import org.apache.spark.sql._
 
 object ConsumptionDF {
    def main(args: Array[String]): Unit = {
@@ -48,9 +49,13 @@ object ConsumptionDF {
                                      drop(calendarDF("dateID"))*/
    //val df = joinedSalesGroup.select(($"dateYear"%1000).alias("Year"), $"weekNumber", $"storeID", $"productId", $"salesUnits", $"netSales")
    //val df = joinedSalesGroup.select(concat(lit("Y"), ($"dateYear"%1000).alias("Year").cast(StringType), lit("W"), ($"weekNumber").cast(StringType)).alias("ID"), $"storeID", $"productId", $"salesUnits", $"netSales")
-
-   joinedSalesGroup.show()
    //df.show()
+   //joinedSalesGroup.show()
+
+   val aggConsumptionGroup = joinedSalesGroup.groupBy($"ID", $"storeID", $"productID").
+                             agg(sum($"salesUnits").as("salesUnits"),round(sum($"netSales"),2).as("netSales"))
+   aggConsumptionGroup.show()
+
    spark.stop()
   }
 }
