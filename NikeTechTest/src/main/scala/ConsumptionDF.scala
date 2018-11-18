@@ -23,24 +23,6 @@ object ConsumptionDF {
        StructField("productID",LongType)
        ))
 
-   val calSchema = StructType(Array(
-       StructField("dateID",IntegerType),
-       StructField("dateYear",IntegerType),
-       StructField("weekNumber",IntegerType)
-       ))
-       
-   val storeSchema = StructType(Array(
-       StructField("storeID",IntegerType),
-       StructField("country",StringType)
-       ))
-       
-   val productSchema = StructType(Array(
-       StructField("productID",LongType),
-       StructField("division",StringType),
-       StructField("gender",StringType),
-       StructField("category",StringType)
-       ))
-  
    val salesDF = spark.read.schema(salSchema).option("header", "true").csv("data/sales.csv").
                  select("saleID", "storeID", "dateID", "productID", "salesUnits", "netSales")
    //salesDF.show()
@@ -50,6 +32,13 @@ object ConsumptionDF {
                      line => val p = line.split(",").map(_.trim)
                      Row(p(0).toInt, p(2).toInt, p(3).toInt)
                      }
+   
+   val calSchema = StructType(Array(
+       StructField("dateID",IntegerType),
+       StructField("dateYear",IntegerType),
+       StructField("weekNumber",IntegerType)
+       ))
+       
    val calendarDF = spark.createDataFrame(calendarRDD, calSchema)
    //calendarDF.show()
 
@@ -73,12 +62,26 @@ object ConsumptionDF {
                      val p = line.split(",").map(_.trim)
                      Row(p(0).toInt, p(2))
                   }
+   
+   val storeSchema = StructType(Array(
+       StructField("storeID",IntegerType),
+       StructField("country",StringType)
+       ))
+       
    val storeDF = spark.createDataFrame(storeRDD, storeSchema)
    
    val productRDD = spark.sparkContext.textFile("data/product.csv").filter(!_.contains("productid")).
                           map { line => val p = line.split(",").map(_.trim)
                           Row(p(0).toLong, p(1), p(2), p(3))
                           }
+   
+   val productSchema = StructType(Array(
+       StructField("productID",LongType),
+       StructField("division",StringType),
+       StructField("gender",StringType),
+       StructField("category",StringType)
+       ))
+  
    val productDF = spark.createDataFrame(productRDD, productSchema)
    
    val consumptionDF = aggConsumptionGroup.as("c").join(storeDF.as("s")).
