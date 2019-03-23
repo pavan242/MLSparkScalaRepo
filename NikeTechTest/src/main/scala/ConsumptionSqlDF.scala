@@ -57,7 +57,7 @@ object ConsumptionSqlDF {
     //productDF.printSchema()
     //productDF.show()
 
-    val consumptionDF = spark.sqlContext.sql("select CONCAT(ID, '_', country, '_', division, '_', gender, '_', category) as ID, salesUnits, netSales from AggTable join StoreTable on AggTable.storeid = StoreTable.storeid join ProductTable on AggTable.productId = ProductTable.productId")
+    val consumptionDF = spark.sqlContext.sql("select CONCAT(ID, '_', country, '_', division, '_', gender, '_', category) as ID, salesUnits  as `Sales Units`, netSales as `Net Sales` from AggTable join StoreTable on AggTable.storeid = StoreTable.storeid join ProductTable on AggTable.productId = ProductTable.productId")
     consumptionDF.printSchema()
     consumptionDF.show()
   }
