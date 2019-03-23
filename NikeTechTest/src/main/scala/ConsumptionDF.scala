@@ -13,6 +13,7 @@ object ConsumptionDF {
    spark.sparkContext.setLogLevel("WARN")
   
    import spark.implicits._
+   //import spark.sqlContext.implicits._
   
    val salSchema = StructType(Array(
        StructField("saleID",IntegerType),
@@ -88,7 +89,7 @@ object ConsumptionDF {
                        where($"c.storeID" === $"s.storeID").drop($"s.storeID").
                        join(productDF.as("p")).
                        where($"c.productID" === $"p.productID").drop($"p.productID").
-                       select(concat($"ID",lit("_"),$"country",lit("_"),$"division",lit("_"),$"gender",lit("_"),$"category").alias("ID"),$"salesUnits",$"netSales")
+                       select(concat($"ID",lit("_"),$"country",lit("_"),$"division",lit("_"),$"gender",lit("_"),$"category").alias("ID"),$"salesUnits".alias("Sales Units"),$"netSales")
                        
    consumptionDF.show()
    //consumptionDF.repartition(1).write.json("/home/pavan/Data/output")
